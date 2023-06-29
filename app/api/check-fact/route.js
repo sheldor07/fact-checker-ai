@@ -1,18 +1,15 @@
 import { Configuration, OpenAIApi } from "openai";
 import { NextResponse } from "next/server";
 
-let KEY = "AIzaSyBeaAO6N8fNSlJx5Scuh3fYSPfyn1CKhHg";
-let OPENAI_API_KEY = "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";
-
 const configuration = new Configuration({
-  apiKey: OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const openai = new OpenAIApi(configuration);
 
 async function fact_check(query) {
   const response = await fetch(
-    `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${query}&key=${KEY}`,
+    `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${query}&key=${process.env.KEY}`,
     {
       method: "GET",
       headers: {
@@ -65,7 +62,6 @@ async function generateVerdict(query, preprocessedClaims) {
       { role: "user", content: user_prompt },
     ],
   });
-
   return completion.data.choices[0].message.content;
 }
 // ... (rest of your helper functions here)
@@ -83,9 +79,8 @@ function preprocessClaim(claim) {
   };
 }
 export async function POST(request) {
-  console.log("request", request);
-  const { claims } = request.body;
-
+  const { searchParams } = new URL(request.url);
+  const claims = searchParams.get("query");
   try {
     const verdict = await fact_check(claims);
     return NextResponse.json({ verdict });
