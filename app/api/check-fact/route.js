@@ -29,6 +29,7 @@ async function fact_check(query) {
     let verdict = await generateVerdict(query, preprocessedClaims);
     return verdict;
   } else {
+    return { verdict: "No valid claims found in the response." };
     console.error("No valid claims found in the response.");
   }
 }
