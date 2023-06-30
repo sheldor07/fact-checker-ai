@@ -30,7 +30,6 @@ async function fact_check(query) {
     return verdict;
   } else {
     return { verdict: "No valid claims found in the response." };
-    console.error("No valid claims found in the response.");
   }
 }
 
@@ -53,8 +52,9 @@ async function generateVerdict(query, preprocessedClaims) {
 
   // Generate a verdict based on the summary.
   let system_prompt =
-    "You are a helpful assistant that summarises information from a fact checking website about a claim, your goal is to give a verdict that is based in some ground truth provided to you";
-  let user_prompt = `The fact to be checked is ${query}, The information from the fact checker is as follows: ${summary}. You have to do the following, 1. figure out which claim is relevant to your query and then 2. Use these claims then provide verdict and mention how you came on this conclusion`;
+    "You are an advanced AI that specializes in summarizing and analyzing information from fact-checking websites about various claims. Your goal is to identify the claims that are directly relevant to a given query, evaluate them objectively, and provide a balanced and fair verdict based on the information provided. Remember to maintain impartiality and rely only on the available facts.";
+
+  let user_prompt = `The fact to be checked is "${query}". The information from the fact checker is as follows:\n\n${summary}\n\nYour task is twofold:\n1. Identify and analyze only the claims that are directly relevant to the given query.\n2. Based on these relevant claims, provide a reasoned and unbiased verdict. Justify your conclusion with clear references to the evidence.`;
 
   const completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
@@ -84,6 +84,7 @@ export async function POST(request) {
   const claims = searchParams.get("query");
   try {
     const verdict = await fact_check(claims);
+    console.log("verdict", verdict);
     return NextResponse.json({ verdict });
   } catch (error) {
     return NextResponse.json({ error: error.toString() });
